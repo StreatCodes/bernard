@@ -11,17 +11,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Log struct {
-	At      time.Time
-	Content string
+type Service struct {
+	DB *database.DB
 }
 
 func main() {
-	_, err := database.CreateInMemoryDB("init.sql")
+	//Setup DB
+	db, err := database.CreateInMemoryDB("init.sql")
 	if err != nil {
 		log.Fatalf("Error opening database: %s\n", err)
 	}
 
+	service := Service{
+		DB: db,
+	}
+
+	//Setup middlewares
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -30,6 +35,9 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	r.Use(middleware.Timeout(60 * time.Second))
+
+	//Setup routes
+	r.Post("/login", service.HandleLogin)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("welcome"))
