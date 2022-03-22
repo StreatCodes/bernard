@@ -12,6 +12,16 @@ CREATE TABLE sessions (
 	user_id INTEGER
 );
 
+CREATE TABLE hosts (
+	id INTEGER PRIMARY KEY,
+	domain TEXT NOT NULL,
+	name TEXT NOT NULL,
+	description TEXT NOT NULL,
+	key BLOB
+);
+
+CREATE INDEX domain_index on hosts(domain);
+
 CREATE TABLE logs (
 	time DATETIME PRIMARY KEY,
 	host_id INTEGER,

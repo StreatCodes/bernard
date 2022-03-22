@@ -1,11 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/StreatCodes/bernard/database"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -15,28 +17,23 @@ type Log struct {
 }
 
 func main() {
-	db, err := database.CreateInMemoryDB("init.sql")
+	_, err := database.CreateInMemoryDB("init.sql")
 	if err != nil {
 		log.Fatalf("Error opening database: %s\n", err)
 	}
 
-	err = db.InsertLog(database.Log{
-		Time:    time.Now(),
-		HostID:  1,
-		Level:   0,
-		Service: "test",
-		Content: "Testing 123",
+	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("welcome"))
 	})
-	if err != nil {
-		log.Fatalf("Error inserting log: %s\n", err)
-	}
 
-	logs, err := db.SelectSince(time.Now().Add(-time.Hour))
-	if err != nil {
-		log.Fatalf("Error fetching logs: %s\n", err)
-	}
-
-	for _, log := range logs {
-		fmt.Printf("%s\n", log.Time)
-	}
+	http.ListenAndServe(":3000", r)
 }
