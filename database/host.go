@@ -29,6 +29,13 @@ func (db *DB) SelectHostById(id int64) (Host, error) {
 	return host, err
 }
 
+func (db *DB) SelectHostByKey(key []byte) (Host, error) {
+	host := Host{}
+	err := db.RawDB.Get(&host, `SELECT * FROM hosts WHERE key = ?`, key)
+
+	return host, err
+}
+
 func (db *DB) SearchHostByDomain(query string) ([]Host, error) {
 	hosts := []Host{}
 	err := db.RawDB.Select(&hosts, `SELECT * FROM hosts WHERE domain LIKE ? COLLATE NOCASE`, "%"+query+"%")
