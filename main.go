@@ -65,6 +65,10 @@ func main() {
 		r.Use(service.userAuthMiddleWare)
 
 		r.Post("/host", service.HandleCreateHost)
+		// r.Get("/host", service.HandleGetHosts)
+		// r.Get("/host/{:id}", service.HandleGetHost)
+		// r.Get("/host/{:id}/log", service.HandleGetHostLogs)
+		// r.Get("/host/{:id}/metrics", service.HandleGetHostMetrics)
 	})
 
 	//Run web server
