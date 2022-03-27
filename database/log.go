@@ -18,14 +18,15 @@ func (db *DB) InsertLog(log Log) error {
 	return err
 }
 
-func (db *DB) SelectSince(since time.Time) ([]Log, error) {
+func (db *DB) SelectLogsBetween(start time.Time, end time.Time) ([]Log, error) {
 	logs := []Log{}
-	err := db.RawDB.Select(&logs, `SELECT * FROM logs WHERE time > ?`, since)
+	err := db.RawDB.Select(&logs, `SELECT * FROM logs WHERE time > ? AND time < ?`, start, end)
 	return logs, err
 }
 
-func (db *DB) SelectBetween(start time.Time, end time.Time) ([]Log, error) {
+func (db *DB) SelectHostLogsBetween(hostID int64, start time.Time, end time.Time) ([]Log, error) {
 	logs := []Log{}
-	err := db.RawDB.Select(&logs, `SELECT * FROM logs WHERE time > ? AND time < ?`, start, end)
+	err := db.RawDB.Select(&logs, `SELECT * FROM logs
+        WHERE host_id = ? AND time > ? AND time < ?`, hostID, start, end)
 	return logs, err
 }

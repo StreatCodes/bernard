@@ -22,6 +22,13 @@ func (db *DB) CreateHost(domain, name, description string) (int64, error) {
 	return res.LastInsertId()
 }
 
+func (db *DB) SelectHosts(after, limit int64) ([]Host, error) {
+	host := []Host{}
+	err := db.RawDB.Get(&host, `SELECT * FROM hosts WHERE id > ? LIMIT ?`, after, limit)
+
+	return host, err
+}
+
 func (db *DB) SelectHostById(id int64) (Host, error) {
 	host := Host{}
 	err := db.RawDB.Get(&host, `SELECT * FROM hosts WHERE id = ?`, id)
