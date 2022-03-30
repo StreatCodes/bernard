@@ -20,32 +20,31 @@ type Service struct {
 	DB *database.DB
 }
 
-func main() {
+func initDB(test bool) (*database.DB, error) {
+	if test {
+		return database.CreateInMemoryDB("./init.sql")
+	}
+
 	//Check DB is setup
 	_, err := os.Stat(DBFile)
 	if errors.Is(err, os.ErrNotExist) {
 		fmt.Printf("%s not found, running setup\n", DBFile)
 		err := database.SetupDB(DBFile, "init.sql")
 		if err != nil {
-			log.Fatalf("Error initializing DB: %s\n", err)
+			return nil, err
 		}
 
 		fmt.Printf("Database setup complete! You can always delete %s to start fresh\n", DBFile)
 	} else if err != nil {
-		log.Fatalf("Error stating DB file (%s): %s", DBFile, err)
+		return nil, err
 	}
 
 	//Connect to DB
 	fmt.Printf("Connecting to %s\n", DBFile)
-	db, err := database.ConnectFileDB(DBFile)
-	if err != nil {
-		log.Fatalf("Error opening database: %s\n", err)
-	}
+	return database.ConnectFileDB(DBFile)
+}
 
-	service := Service{
-		DB: db,
-	}
-
+func (s *Service) startWebServer(addr string) error {
 	//Setup middlewares
 	r := chi.NewRouter()
 
@@ -57,22 +56,37 @@ func main() {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	//Setup routes
-	r.Post("/login", service.HandleLogin)
+	r.Post("/login", s.HandleLogin)
 
-	r.With(service.hostAuthMiddleware).Post("/log", service.HandleNewLog)
+	r.With(s.hostAuthMiddleware).Post("/log", s.HandleNewLog)
 
 	r.Route("/", func(r chi.Router) {
-		r.Use(service.userAuthMiddleWare)
+		r.Use(s.userAuthMiddleWare)
 
-		r.Post("/host", service.HandleCreateHost)
-		r.Get("/host", service.HandleGetHosts)
-		r.Get("/host/{id}", service.HandleGetHost)
-		r.Get("/host/{id}/log", service.HandleGetHostLogs)
-		// r.Get("/host/{id}/metrics", service.HandleGetHostMetrics)
+		r.Post("/host", s.HandleCreateHost)
+		r.Get("/host", s.HandleGetHosts)
+		r.Get("/host/{id}", s.HandleGetHost)
+		r.Get("/host/{id}/log", s.HandleGetHostLogs)
+		// r.Get("/host/{id}/metrics", s.HandleGetHostMetrics)
 	})
 
 	//Run web server
-	webAddr := "localhost:3000"
-	fmt.Printf("Starting web server on %s\n", webAddr)
-	http.ListenAndServe(webAddr, r)
+	fmt.Printf("Starting web server on %s\n", addr)
+	return http.ListenAndServe(addr, r)
+}
+
+func main() {
+	db, err := initDB(false)
+	if err != nil {
+		log.Fatalf("Error intilizing DB: %s\n", err)
+	}
+
+	service := Service{
+		DB: db,
+	}
+
+	err = service.startWebServer("localhost:3000")
+	if err != nil {
+		log.Fatalf("Error starting web server: %s\n", err)
+	}
 }

@@ -13,9 +13,14 @@ type ContextKey string
 const ContextUserKey ContextKey = "user"
 const ContextHostKey ContextKey = "host"
 
-func (service *Service) userAuthMiddleWare(h http.Handler) http.Handler {
+func (service *Service) userAuthMiddleWare(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		encodedToken := r.Header.Get("Authorization")
+
+		if encodedToken == "" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 
 		if len(encodedToken) != database.TokenLength*2 {
 			w.WriteHeader(http.StatusBadRequest)
@@ -35,15 +40,13 @@ func (service *Service) userAuthMiddleWare(h http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), ContextUserKey, user)
-		r.WithContext(ctx)
-
-		h.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 
 	return http.HandlerFunc(fn)
 }
 
-func (service *Service) hostAuthMiddleware(h http.Handler) http.Handler {
+func (service *Service) hostAuthMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		encodedToken := r.Header.Get("Authorization")
 
@@ -65,9 +68,7 @@ func (service *Service) hostAuthMiddleware(h http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), ContextHostKey, host)
-		r.WithContext(ctx)
-
-		h.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 
 	return http.HandlerFunc(fn)
