@@ -1,0 +1,24 @@
+.side-bar {
+    display: flex;
+    width: 200px;
+    flex-direction: column;
+}
+
+.side-bar .link {
+    text-decoration: none;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid transparent;
+    color: var(--color-primary);
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+.side-bar .link.active {
+    color: var(--color-primary-active);
+    border-left-color: var(--color-primary-active);
+}
+
+.side-bar .link:hover {
+    color: var(--color-primary-hover);
+}

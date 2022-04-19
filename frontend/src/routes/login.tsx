@@ -5,9 +5,13 @@ import { Button } from '@streatcodes/silk/components/button'
 import { Input } from '@streatcodes/silk/components/input'
 import './login.css';
 
-import * as api from './api';
+import * as api from '../api';
 
-export const Login: FunctionalComponent = () => {
+interface Props {
+    isAuthed: (authed: boolean) => void;
+}
+
+export const Login: FunctionalComponent<Props> = ({ isAuthed }) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -18,8 +22,8 @@ export const Login: FunctionalComponent = () => {
 
         try {
             const token = await api.login(email, password);
-            console.log(token)
-            console.log('succesful login')
+            localStorage.setItem('bernard-token', token);
+            isAuthed(true)
         } catch (e) {
             //TODO show error
             console.error(e.message)
@@ -30,14 +34,15 @@ export const Login: FunctionalComponent = () => {
 
     return (
         <div className="login">
+            <h1 >bernard</h1>
             <form onSubmit={onLogin}>
                 <label>
                     <p>Email</p>
-                    <Input type="email" value={email} onChange={v => setEmail(v as string)} />
+                    <Input type="email" value={email} onChange={v => setEmail(v as string)} placeholder="bernard@example.com" />
                 </label>
                 <label>
                     <p>Password</p>
-                    <Input type="password" value={password} onChange={v => setPassword(v as string)} />
+                    <Input type="password" value={password} onChange={v => setPassword(v as string)} placeholder="●●●●●●●●●●●●●●●●●●●" />
                 </label>
                 <Button loading={loading}>Login</Button>
             </form>
