@@ -9,7 +9,7 @@ import (
 func TestCreateHost(t *testing.T) {
 	db, err := CreateInMemoryDB("../init.sql")
 	if err != nil {
-		t.Errorf("Error opening database: %s", err)
+		t.Fatalf("Error opening database: %s", err)
 	}
 
 	id, err := db.CreateHost("example.com", "Example Server", "An example host")

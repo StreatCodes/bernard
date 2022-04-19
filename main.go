@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"time"
 
 	"github.com/StreatCodes/bernard/database"
@@ -54,25 +55,42 @@ func (s *Service) startWebServer(addr string) error {
 	r.Use(middleware.Recoverer)
 
 	r.Use(middleware.Timeout(60 * time.Second))
+	r.Route("/api", func(r chi.Router) {
 
-	//Setup routes
-	r.Post("/login", s.HandleLogin)
+		//Setup routes
+		r.Post("/login", s.HandleLogin)
 
-	r.With(s.hostAuthMiddleware).Post("/log", s.HandleNewLog)
+		r.With(s.hostAuthMiddleware).Post("/log", s.HandleNewLog)
 
-	r.Route("/", func(r chi.Router) {
-		r.Use(s.userAuthMiddleWare)
+		r.Route("/", func(r chi.Router) {
+			r.Use(s.userAuthMiddleWare)
 
-		r.Post("/host", s.HandleCreateHost)
-		r.Get("/host", s.HandleGetHosts)
-		r.Get("/host/{id}", s.HandleGetHost)
-		r.Get("/host/{id}/log", s.HandleGetHostLogs)
-		// r.Get("/host/{id}/metrics", s.HandleGetHostMetrics)
+			r.Post("/host", s.HandleCreateHost)
+			r.Get("/host", s.HandleGetHosts)
+			r.Get("/host/{id}", s.HandleGetHost)
+			r.Get("/host/{id}/log", s.HandleGetHostLogs)
+			// r.Get("/host/{id}/metrics", s.HandleGetHostMetrics)
+		})
 	})
+
+	r.NotFound(fileHandler)
 
 	//Run web server
 	fmt.Printf("Starting web server on %s\n", addr)
 	return http.ListenAndServe(addr, r)
+}
+
+func fileHandler(w http.ResponseWriter, r *http.Request) {
+	reqPath := path.Join("frontend", path.Clean(r.URL.Path))
+
+	//serve index.html if requested file doesn't exist
+	_, err := os.Stat(reqPath)
+	if errors.Is(err, os.ErrNotExist) {
+		http.ServeFile(w, r, "frontend/index.html")
+		return
+	}
+
+	http.ServeFile(w, r, reqPath)
 }
 
 func main() {

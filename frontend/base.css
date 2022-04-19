@@ -1,0 +1,84 @@
+:root {
+    --color-text-black: #272727;
+    --color-text-white: #e4e4e4;
+    --color-text-subdued: #646464;
+
+    --color-primary: #44a6c4;
+    --color-primary-hover: #51b3d1;
+    --color-primary-active: #1c9ac0;
+    --color-primary-faded: #44a6c470;
+
+    --color-secondary: #c077ca;
+    --color-secondary-hover: #c189c8;
+    --color-secondary-active: #bc61c8;
+    --color-secondary-faded: #c077ca70;
+
+    --color-critical: #f04242;
+    --color-critical-hover: #ee5959;
+    --color-critical-active: #e02e2e;
+    --color-critical-faded: #f0424270;
+
+    --color-warning: #e7862c;
+    --color-warning-hover: #e99343;
+    --color-warning-active: #dd7616;
+    --color-warning-faded: #e7862c70;
+
+
+    --color-success: #47b331;
+    --color-success-hover: #67c354;
+    --color-success-active: #2eaa15;
+    --color-success-faded: #47b33170;
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(/assets/quicksand-regular.woff2) format('woff2');
+}
+
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url(/assets/quicksand-bold.woff2) format('woff2');
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    background-color: var(--color-text-white);
+    color: var(--color-text-black);
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: var(--color-text-black);
+        color: var(--color-text-white);
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+hr {
+    border: 0;
+    border-top: solid 1px var(--color-text-subdued);
+}

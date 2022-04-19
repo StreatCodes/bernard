@@ -1,2 +1,5 @@
-/bernard.exe
+*.exe
 /bernard.db
+/frontend/node_modules
+/frontend/dist
+/bernard-log/bernard-conf.json
